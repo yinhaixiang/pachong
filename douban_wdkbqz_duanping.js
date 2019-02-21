@@ -31,7 +31,7 @@ async function main() {
   // 设置视窗大小
   await page.setViewport({width: 1500, height: 0});
 
-  //先登录
+  // 先登录
   // await page.goto('https://accounts.douban.com/passport/login');
   // await page.click('#account > div.login-wrap > div.login-right > div > div.account-body-tabs > ul.tab-start > li.account-tab-account');
   // await page.type('#username', 'xxx');
