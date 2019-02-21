@@ -32,12 +32,12 @@ async function main() {
   await page.setViewport({width: 1500, height: 0});
 
   //先登录
-  await page.goto('https://accounts.douban.com/passport/login');
-  await page.click('#account > div.login-wrap > div.login-right > div > div.account-body-tabs > ul.tab-start > li.account-tab-account');
-  await page.type('#username', '13482034233');
-  await page.type('#password', 'sean0410');
-  await page.click('#tmpl_phone > div.account-form-field-submit > a');
-  await page.waitForNavigation();
+  // await page.goto('https://accounts.douban.com/passport/login');
+  // await page.click('#account > div.login-wrap > div.login-right > div > div.account-body-tabs > ul.tab-start > li.account-tab-account');
+  // await page.type('#username', 'xxx');
+  // await page.type('#password', 'xxx');
+  // await page.click('#tmpl_phone > div.account-form-field-submit > a');
+  // await page.waitForNavigation();
 
 
   // 进入首页
