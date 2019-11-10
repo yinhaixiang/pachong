@@ -2,7 +2,7 @@ const puppeteer = require('puppeteer');
 const fs = require('fs');
 
 async function main() {
-  const browser = await puppeteer.launch({headless: true, slowMo: 0});
+  const browser = await puppeteer.launch({headless: false, slowMo: 0});
   const page = await browser.newPage();
   await page.setViewport({width: 1500, height: 0});
   page.on('console', msg => {
@@ -21,9 +21,9 @@ async function main() {
       var y = 1900 + date.getYear();
       var m = "0" + (date.getMonth() + 1);
       var d = "0" + date.getDate();
-      var h = "0" + date.getHours();                  //时
-      var min = "0" + date.getMinutes();              //分
-      var s = "0" + date.getSeconds();              //秒
+      var h = "0" + date.getHours();
+      var min = "0" + date.getMinutes();
+      var s = "0" + date.getSeconds();
       if (needTime) {
         return y + "-" + m.substring(m.length - 2, m.length) + "-" + d.substring(d.length - 2, d.length) +
           ' ' + h.substring(h.length - 2, h.length) + ":00:00";
@@ -72,15 +72,19 @@ async function main() {
   let preScrollHeight = 0;
   let scrollHeight = -1;
   let cnt = 0;
-  while (preScrollHeight !== scrollHeight) {
-  // while (cnt < 10000) {
+  let retry_cnt = 0;
+  // while (preScrollHeight !== scrollHeight && retry_cnt < 50) {
+  while (cnt < 10000) {
     // 详情信息是根据滚动异步加载，所以需要让页面滚动到屏幕最下方，通过延迟等待的方式进行多次滚动
     let scrollH1 = await page.evaluate(async () => {
       let h1 = document.body.scrollHeight;
       window.scrollTo(0, h1);
       return h1;
     });
-    await page.waitFor(500);
+
+    // 延迟时间
+    await page.waitFor(5);
+
     let scrollH2 = await page.evaluate(async () => {
       return document.body.scrollHeight;
     });
@@ -89,6 +93,15 @@ async function main() {
     scrollHeight = scrollResult[1];
     cnt++;
     console.log(scrollResult, cnt);
+
+    if (preScrollHeight == scrollHeight) {
+      retry_cnt++;
+      if (retry_cnt > 100) {
+        break;
+      }
+    } else {
+      retry_cnt = 0;
+    }
   }
 
   let blogs = await page.$$eval('#juejin > div.view-container > main > div > div.feed.welcome__feed > ul > li > div > div > a > div > div.info-box', async eles => {
@@ -107,7 +120,7 @@ async function main() {
     return tmpBlogs;
   });
 
-  let writerStream = fs.createWriteStream('juejin.json');
+  let writerStream = fs.createWriteStream('juejin_backend.json');
   writerStream.write(JSON.stringify(blogs));
   writerStream.end();
   console.log('write done');
