@@ -15,14 +15,14 @@ async function main() {
   let topics = await db.collection('topics')
     .find(
       {tab: 'toutiao', content: /https:\/\/toutiao.io/}
-    ).skip(0).limit(1000).sort({create_at: -1})
+    ).skip(0).limit(10000).sort({create_at: -1})
     .toArray();
 
   for (let i = 0; i < topics.length; i++) {
+    let topic = topics[i];
     try {
-      let topic = topics[i];
       console.log(i + '.......', topic.title, topic.content);
-      await page.goto(topic.content, {timeout: 7 * 1000, waitUntil: 'domcontentloaded'});
+      await page.goto(topic.content, {timeout: 3 * 1000, waitUntil: 'domcontentloaded'});
       let content = page.url();
       let result = await db.collection('topics').updateOne({_id: topic._id}, {
         $set: {
@@ -31,8 +31,15 @@ async function main() {
       });
       console.log(i, topics.length, content);
     } catch (e) {
-      console.log(e);
-      continue;
+      console.log('xxxxxxxxxxxxxxxxxx');
+      let content = page.url();
+      let result = await db.collection('topics').updateOne({_id: topic._id}, {
+        $set: {
+          content: content
+        }
+      });
+      console.log(i, topics.length, content);
+      console.log('yyyyyyyyyyyyyy');
     }
   }
 
