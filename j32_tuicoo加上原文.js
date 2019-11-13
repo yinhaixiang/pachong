@@ -20,7 +20,7 @@ async function main() {
   let topics = await db.collection('topics')
     .find(
       {tab: 'tuicool', content: {$not: /原文/}}
-    ).skip(0).limit(10).sort({create_at: -1})
+    ).skip(0).limit(10000).sort({create_at: -1})
     .toArray();
 
   for (let i = 0; i < topics.length; i++) {
@@ -29,20 +29,31 @@ async function main() {
     if (!topic.content.includes('原文')) {
       try {
         await page.goto(topic.content, {timeout: 3 * 1000, waitUntil: 'domcontentloaded'});
-        await page.waitFor(2000 + Math.floor(Math.random() * (1000)));
-        let real_url = await page.$eval('body > div.container-fluid > div.row-fluid.article_row_fluid > div.span8.contant.article_detail_bg > div.article_meta > div.source > a', ele => ele.href);
+        await page.waitFor(1000 + Math.floor(Math.random() * (1000)));
+        let real_url = await page.$eval('body > div.container-fluid > div.row-fluid.article_row_fluid > div.span8.contant.article_detail_bg > div.article_meta > div.source > a', el => el.href);
         topic.content = `${topic.content}\r\n原文\r\n${real_url}`;
+        let tmpSource = await page.$eval('body > div.container-fluid > div.row-fluid.article_row_fluid > div.span8.contant.article_detail_bg > div.article_meta > div:nth-child(1) > span.from > a', el => el.innerText.trim());
+        let blogDate = await page.$eval('body > div.container-fluid > div.row-fluid.article_row_fluid > div.span8.contant.article_detail_bg > div.article_meta > div:nth-child(1) > span.timestamp', el => el.innerText);
+        if (tmpSource) {
+          topic.source = tmpSource;
+        }
+        if (blogDate) {
+          topic.create_at = topic.update_at = new Date(blogDate.replace('时间', '').trim())
+        }
       } catch (e) {
         if (page.url() != topic.content && page.url() != 'chrome-error://chromewebdata/') {
           topic.content = `${topic.content}\r\n原文\r\n${page.url()}`;
         } else {
-          console.log(e);
+          console.log(e.message);
         }
       }
-      console.log(i, topics.length, topic.content);
+      console.log(i, topics.length, topic.source, topic.create_at, topic.content);
       let result = await db.collection('topics').updateOne({_id: topic._id}, {
         $set: {
-          content: topic.content
+          content: topic.content,
+          source: topic.source,
+          create_at: topic.create_at,
+          update_at: topic.update_at
         }
       });
     }
