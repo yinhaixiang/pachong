@@ -28,7 +28,7 @@ async function main() {
     console.log(i + '.......', topic.title);
     if (!topic.content.includes('原文')) {
       try {
-        await page.goto(topic.content, {timeout: 3 * 1000, waitUntil: 'domcontentloaded'});
+        await page.goto(topic.content, {waitUntil: 'domcontentloaded'});
         await page.waitFor(1000 + Math.floor(Math.random() * (1000)));
         let real_url = await page.$eval('body > div.container-fluid > div.row-fluid.article_row_fluid > div.span8.contant.article_detail_bg > div.article_meta > div.source > a', el => el.href);
         topic.content = `${topic.content}\r\n原文\r\n${real_url}`;
@@ -44,7 +44,7 @@ async function main() {
         if (page.url() != topic.content && page.url() != 'chrome-error://chromewebdata/') {
           topic.content = `${topic.content}\r\n原文\r\n${page.url()}`;
         } else {
-          console.log(e.message);
+          console.log('发生异常了, url为', page.url());
         }
       }
       console.log(i, topics.length, topic.source, topic.create_at, topic.content);
