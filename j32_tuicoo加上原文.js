@@ -20,7 +20,7 @@ async function main() {
   let topics = await db.collection('topics')
     .find(
       {tab: 'tuicool', content: {$not: /原文/}}
-    ).skip(0).limit(10000).sort({create_at: -1})
+    ).limit(30).sort({create_at: -1})
     .toArray();
 
   for (let i = 0; i < topics.length; i++) {
@@ -29,7 +29,7 @@ async function main() {
     if (!topic.content.includes('原文')) {
       try {
         await page.goto(topic.content, {waitUntil: 'domcontentloaded'});
-        await page.waitFor(1000 + Math.floor(Math.random() * (1000)));
+        await page.waitFor(3000 + Math.floor(Math.random() * (1000)));
         let real_url = await page.$eval('body > div.container-fluid > div.row-fluid.article_row_fluid > div.span8.contant.article_detail_bg > div.article_meta > div.source > a', el => el.href);
         topic.content = `${topic.content}\r\n原文\r\n${real_url}`;
         let tmpSource = await page.$eval('body > div.container-fluid > div.row-fluid.article_row_fluid > div.span8.contant.article_detail_bg > div.article_meta > div:nth-child(1) > span.from > a', el => el.innerText.trim());
