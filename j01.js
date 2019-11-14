@@ -5,7 +5,7 @@ const url = "mongodb://egg_cnode:bojun1234@106.54.233.42:27127/egg_cnode?authSou
 
 
 async function main() {
-  const browser = await puppeteer.launch({headless: true, slowMo: 0});
+  const browser = await puppeteer.launch({headless: true, args: ['--no-sandbox']});
   const page = await browser.newPage();
   await page.setViewport({width: 1500, height: 0});
   await page.setExtraHTTPHeaders({'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.70 Safari/537.36'});
@@ -43,7 +43,7 @@ async function main() {
           console.log('发生异常了, url为', page.url());
         }
       }
-      console.log(i, topics.length, topic.source, topic.create_at, topic.content);
+      console.log(i, topics.length, topic.source, topic.content);
       let result = await db.collection('topics').updateOne({_id: topic._id}, {
         $set: {
           content: topic.content,
