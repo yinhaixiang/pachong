@@ -27,7 +27,7 @@ async function main() {
         await page.goto(topic.content, {waitUntil: 'domcontentloaded'});
         await page.waitFor(3000 + Math.floor(Math.random() * (1000)));
         let real_url = await page.$eval('body > div.container-fluid > div.row-fluid.article_row_fluid > div.span8.contant.article_detail_bg > div.article_meta > div.source > a', el => el.href);
-        topic.content = `${topic.content}\r\n原文\r\n${real_url}`;
+        topic.content = `${topic.content}\r\n原文: ${real_url}`;
         let tmpSource = await page.$eval('body > div.container-fluid > div.row-fluid.article_row_fluid > div.span8.contant.article_detail_bg > div.article_meta > div:nth-child(1) > span.from > a', el => el.innerText.trim());
         let blogDate = await page.$eval('body > div.container-fluid > div.row-fluid.article_row_fluid > div.span8.contant.article_detail_bg > div.article_meta > div:nth-child(1) > span.timestamp', el => el.innerText);
         if (tmpSource) {
@@ -38,7 +38,7 @@ async function main() {
         }
       } catch (e) {
         if (page.url() != topic.content && page.url() != 'chrome-error://chromewebdata/') {
-          topic.content = `${topic.content}\r\n原文\r\n${page.url()}`;
+          topic.content = `${topic.content}\r\n原文: ${page.url()}`;
         } else {
           console.log('发生异常了, url为', page.url());
         }
